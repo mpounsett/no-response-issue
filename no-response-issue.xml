@@ -251,96 +251,6 @@ be checked to see if they support DNSSEC with EDNS.
 </section>
 </section>
 
-<section anchor="remediating" title="Remediating">
-<t>While the first step in remediating this problem is to get the offending
-nameserver code corrected, there is a very long tail problem with DNS servers
-in that it can often take over a decade between the code being corrected and a
-nameserver being upgraded with corrected code.  With that in mind it is
-requested that TLD, and other similar zone operators, take steps to identify
-and inform their customers, directly or indirectly through registrars, that
-they are running such servers and that the customers need to correct the
-problem.
-</t>
-<t>TLD operators are being asked to do this as they, due to the nature of running
-a TLD and the hierarchical nature of the DNS, have access to a large numbers
-of nameserver names as well as contact details for the registrants of those
-nameservers.  While it is possible to construct lists of nameservers from
-other sources, and that has been done to survey the state of the Internet,
-that doesn't give the tester the contact details necessary to inform the
-operators.  The SOA RNAME is often invalid and whois data is obscured and / or
-not available which makes it infeasible for others to do this.
-</t>
-<t>While this section talks about TLD operators performing this work, it may be
-done by registrars on behalf of the TLD operator.  The intent is to ensure
-that the testing happens and that operators of non-compliant nameservers be
-informed, rather than to prescribe who does the actual testing and
-communication.  Note: having registrars perform this testing and reporting is
-likely to result in duplicate reports for the same server being issued by
-multiple registrars.
-</t>
-<t>TLD operators should construct a list of servers child zones are delegated to
-along with a delegated zone name.  This name shall be the query name used to
-test the server as it is supposed to exist.
-</t>
-<t>For each server the TLD operator shall make an SOA query of the delegated zone
-name.  This should result in the SOA record being returned in the answer
-section.  If the SOA record is not returned but some other response is
-returned, this is a indication of a bad delegation and the TLD operator should
-take whatever steps it normally takes to rectify a bad delegation.  If more
-that one zone is delegated to the server, it should choose another zone until
-it finds a zone which responds correctly or it exhausts the list of zones
-delegated to the server.
-</t>
-<t>If the server fails to get a response to a SOA query, the TLD operator should
-make an A query as some nameservers fail to respond to SOA queries but respond
-to A queries.  If it gets no response to the A query, another delegated zone
-should be queried for as some nameservers fail to respond to zones they are
-not configured for.  If subsequent queries find a responding zone, all
-delegation to this server need to be checked and rectified using the TLD's
-normal procedures.
-</t>
-<t>Having identified a working &lt;server, query name&gt; tuple the TLD operator
-should now check that the server responds to EDNS, Unknown Query Type and TCP
-tests as described above.  If the TLD operator finds that server fails any of
-the tests, the TLD operator shall take steps to inform the operator of the
-server that they are running a faulty nameserver and that they need to take
-steps to correct the matter.  The TLD operator shall also record the
-&lt;server, query name&gt; for follow-up testing.
-</t>
-<t>If repeated attempts to inform and get the customer to correct / replace the
-faulty server are unsuccessful the TLD operator shall remove all delegations
-to said server from the zone.  Removal of delegations is the step of last
-resort in handling complaints as specified in <xref target="RFC1033"/> COMPLAINTS.
-</t>
-<t>It will also be necessary for TLD operators to repeat the scans periodically.
-It is recommended that this be performed monthly backing off to bi-annually
-once the numbers of faulty servers found drops off to less than 1 in 100000
-servers tested.  Follow-up tests for faulty servers still need to be performed
-monthly.
-</t>
-<t>Some operators claim that they can't perform checks at registration time.  If
-a check is not performed at registration time, it needs to be performed within
-a week of registration in order to detect faulty servers swiftly.
-</t>
-<t>Checking of delegations by TLD operators should be nothing new as they have
-been required from the very beginnings of DNS to do this <xref target="RFC1034"/>.  Checking
-for compliance of nameserver operations should just be a extension of such
-testing.
-</t>
-<t>It is recommended that TLD operators setup a test web page which performs the
-tests the TLD operator performs as part of their regular audits to allow
-nameserver operators to test that they have correctly fixed their servers.
-Such tests should be rate limited to avoid these pages being a denial of
-service vector.
-</t>
-<t>Nothing in this section precludes others testing servers for protocol
-compliance.  DNS operators should test their servers to ensure that their
-vendors have shipped protocol compliant products.  Nameserver vendors can use
-these tests as a part of this release processes.  Registrants can use these
-tests to check their DNS operators servers.
-</t>
-</section>
-
 <section anchor="firewalls-and-load-balancers" title="Firewalls and Load Balancers">
 <t>Firewalls and load balancers can affect the externally visible behaviour of a
 nameserver.  Tests for conformance should to be done from outside of any
@@ -797,6 +707,49 @@ misbehaviour.
 </section>
 </section>
 
+<section anchor="remediation" title="Remediation">
+<t>Name server operators are generally expected to test their own infrastructure
+for compliance to standards. The above tests should be run when new systems
+are brought online, and should be repeated periodically to ensure continued
+interoperability.
+</t>
+<t>In the event that an operator experiences problems due to the behaviour of
+name servers outside their control, the above tests will help in narrowing
+down the precise issue(s) which can then be reported to the relevant party.
+</t>
+<t>If contact information for the operator of a misbehaving name server is not
+already known, the following methods of communication could be considered:
+</t>
+<t>
+<list style="symbols">
+<t>the RNAME of the zone authoritative for the name of the misbehaving server</t>
+<t>the RNAME of zones for which the offending server is authoritative</t>
+<t>administrative or technical contacts listed in the registration information
+for the parent domain of the name of the misbehaving server, or for zones
+for which the name server is authoritative</t>
+<t>the registarar or registry for such zones</t>
+<t>DNS-specific operational fora (e.g. mailing lists)</t>
+</list>
+</t>
+<t>Operators of parent zones may wish to regularly test the authoritative name
+servers of their child zones.  However, parent operators can have widely
+varying capabilities in terms of notification or remediation depending on
+whether they have a direct relationship with the child operator.  Many TLD
+registries, for example, cannot directly contact their registrants and may
+instead need to communicate through the relevant registrar.  In such cases it
+may be most efficient for registrars to take on the responsibility for testing
+the name servers of their registrants, since they have a direct relationship.
+</t>
+<t>When notification is not effective at correcting problems with a misbehaving
+name server, parent operators can choose to remove NS records that refer to
+the faulty server.  This should only be done as a last resort and with due
+consideration, as removal of a delegation can have unanticipated side effects.
+For example, other parts of the DNS tree may depend on names below the removed
+zone cut, and the parent operator may find themselves responsible for causing
+new DNS failures to occur.
+</t>
+</section>
+
 <section anchor="security-considerations" title="Security Considerations">
 <t>Testing protocol compliance can potentially result in false reports of
 attempts to break services from Intrusion Detection Services and firewalls.
@@ -830,9 +783,6 @@ nameservers addresses to be resolved.
 <?rfc include="http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6891.xml"?>
 <?rfc include="http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.6895.xml"?>
 <?rfc include="http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.7766.xml"?>
-</references>
-<references title="Informative References">
-<?rfc include="http://xml2rfc.ietf.org/public/rfc/bibxml/reference.RFC.1033.xml"?>
 </references>
 
 <section anchor="document-source" title="Document Source">
