@@ -531,21 +531,21 @@ Internet-Draft             Failure To Respond             September 2016
 
    Verify the server is configured for the zone:
 
-                dig +noedns +noad +norec soa $zone @$server
+   dig +noedns +noad +norec soa $zone @$server
 
-                expect: status: NOERROR
-                expect: SOA record
-                expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record
+   expect: flag: aa to be present
 
 8.1.2.  Testing Unknown Types?
 
    Check that queries for an unknown type work:
 
-             dig +noedns +noad +norec type1000 $zone @$server
+   dig +noedns +noad +norec type1000 $zone @$server
 
-             expect: status: NOERROR
-             expect: an empty answer section.
-             expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: an empty answer section.
+   expect: flag: aa to be present
 
    That new types are to be expected is specified in Section 3.6,
    [RFC1035].  Servers that don't support a new type are expected to
@@ -571,11 +571,11 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that queries with CD=1 work:
 
-              dig +noedns +noad +norec +cd soa $zone @$server
+   dig +noedns +noad +norec +cd soa $zone @$server
 
-              expect: status: NOERROR
-              expect: SOA record to be present
-              expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record to be present
+   expect: flag: aa to be present
 
    CD use in queries is defined in [RFC4035].
 
@@ -583,11 +583,11 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that queries with AD=1 work:
 
-                 dig +noedns +norec +ad soa $zone @$server
+   dig +noedns +norec +ad soa $zone @$server
 
-                 expect: status: NOERROR
-                 expect: SOA record to be present
-                 expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record to be present
+   expect: flag: aa to be present
 
    AD use in queries is defined in [RFC6840].
 
@@ -596,12 +596,12 @@ Internet-Draft             Failure To Respond             September 2016
    Check that queries with the last unassigned DNS header flag work and
    that the flag bit is not copied to the response:
 
-            dig +noedns +noad +norec +zflag soa $zone @$server
+   dig +noedns +noad +norec +zflag soa $zone @$server
 
-            expect: status: NOERROR
-            expect: SOA record to be present
-            expect: MBZ to not be in the response
-            expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record to be present
+   expect: MBZ to not be in the response
+   expect: flag: aa to be present
 
    MBZ (Must Be Zero) presence indicates the flag bit has been
    incorrectly copied.  See Section 4.1.1, [RFC1035] "Z Reserved for
@@ -622,11 +622,11 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that new opcodes are handled:
 
-         dig +noedns +noad +opcode=15 +norec +header-only @$server
+   dig +noedns +noad +opcode=15 +norec +header-only @$server
 
-         expect: status: NOTIMP
-         expect: SOA record to not be present
-         expect: flag: aa to NOT be present
+   expect: status: NOTIMP
+   expect: SOA record to not be present
+   expect: flag: aa to NOT be present
 
    As unknown opcodes have no definition, including packet format other
    than there must be a DNS header present, there is only one possible
@@ -637,11 +637,11 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that TCP queries work:
 
-             dig +noedns +noad +norec +tcp soa $zone @$server
+   dig +noedns +noad +norec +tcp soa $zone @$server
 
-             expect: status: NOERROR
-             expect: SOA record
-             expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record
+   expect: flag: aa to be present
 
    The requirement that TCP be supported is defined in [RFC7766].
 
@@ -657,13 +657,13 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that plain EDNS queries work:
 
-           dig +nocookie +edns=0 +noad +norec soa $zone @$server
+   dig +nocookie +edns=0 +noad +norec soa $zone @$server
 
-           expect: status: NOERROR
-           expect: SOA record to be present
-           expect: OPT record to be present
-           expect: EDNS Version 0 in response
-           expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record to be present
+   expect: OPT record to be present
+   expect: EDNS Version 0 in response
+   expect: flag: aa to be present
 
 
 
@@ -681,13 +681,13 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that EDNS version 1 queries work (EDNS supported):
 
-     dig +nocookie +edns=1 +noednsneg +noad +norec soa $zone @$server
+   dig +nocookie +edns=1 +noednsneg +noad +norec soa $zone @$server
 
-     expect: status: BADVERS
-     expect: SOA record to not be present
-     expect: OPT record to be present
-     expect: EDNS Version 0 in response
-     expect: flag: aa to NOT be present
+   expect: status: BADVERS
+   expect: SOA record to not be present
+   expect: OPT record to be present
+   expect: EDNS Version 0 in response
+   expect: flag: aa to NOT be present
 
    Only EDNS Version 0 is currently defined so the response should
    always be a 0 version.  This will change when EDNS version 1 is
@@ -698,14 +698,14 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that EDNS queries with an unknown option work (EDNS supported):
 
-    dig +nocookie +edns=0 +noad +norec +ednsopt=100 soa $zone @$server
+   dig +nocookie +edns=0 +noad +norec +ednsopt=100 soa $zone @$server
 
-    expect: status: NOERROR
-    expect: SOA record to be present
-    expect: OPT record to be present
-    expect: OPT=100 to not be present
-    expect: EDNS Version 0 in response
-    expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record to be present
+   expect: OPT record to be present
+   expect: OPT=100 to not be present
+   expect: EDNS Version 0 in response
+   expect: flag: aa to be present
 
    Unknown EDNS options are supposed to be ignored, Section 6.1.2,
    [RFC6891].
@@ -738,15 +738,15 @@ Internet-Draft             Failure To Respond             September 2016
    Check that EDNS version 1 queries with unknown flags work (EDNS
    supported):
 
-    dig +nocookie +edns=1 +noednsneg +noad +norec +ednsflags=0x40 soa \
-        $zone @$server
+   dig +nocookie +edns=1 +noednsneg +noad +norec +ednsflags=0x40 soa \
+       $zone @$server
 
-    expect: status: BADVERS
-    expect: SOA record to NOT be present
-    expect: OPT record to be present
-    expect: MBZ not to be present
-    expect: EDNS Version 0 in response
-    expect: flag: aa to NOT be present
+   expect: status: BADVERS
+   expect: SOA record to NOT be present
+   expect: OPT record to be present
+   expect: MBZ not to be present
+   expect: EDNS Version 0 in response
+   expect: flag: aa to NOT be present
 
    +noednsneg disables EDNS version negotiation in DiG; MBZ (Must Be
    Zero) presence indicates the flag bit has been incorrectly copied.
@@ -756,15 +756,15 @@ Internet-Draft             Failure To Respond             September 2016
    Check that EDNS version 1 queries with unknown options work (EDNS
    supported):
 
-     dig +nocookie +edns=1 +noednsneg +noad +norec +ednsopt=100 soa \
-         $zone @$server
+   dig +nocookie +edns=1 +noednsneg +noad +norec +ednsopt=100 soa \
+       $zone @$server
 
-     expect: status: BADVERS
-     expect: SOA record to NOT be present
-     expect: OPT record to be present
-     expect: OPT=100 to NOT be present
-     expect: EDNS Version 0 in response
-     expect: flag: aa to be present
+   expect: status: BADVERS
+   expect: SOA record to NOT be present
+   expect: OPT record to be present
+   expect: OPT=100 to NOT be present
+   expect: EDNS Version 0 in response
+   expect: flag: aa to be present
 
    +noednsneg disables EDNS version negotiation in DiG.
 
@@ -786,14 +786,14 @@ Andrews                  Expires March 22, 2017                [Page 14]
 Internet-Draft             Failure To Respond             September 2016
 
 
-       dig +nocookie +edns=0 +noad +norec +dnssec soa $zone @$server
+   dig +nocookie +edns=0 +noad +norec +dnssec soa $zone @$server
 
-       expect: status: NOERROR
-       expect: SOA record to be present
-       expect: OPT record to be present
-       expect: DO=1 to be present if a RRSIG is in the response
-       expect: EDNS Version 0 in response
-       expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record to be present
+   expect: OPT record to be present
+   expect: DO=1 to be present if a RRSIG is in the response
+   expect: EDNS Version 0 in response
+   expect: flag: aa to be present
 
    DO=1 should be present if RRSIGs are returned as they indicate that
    the server supports DNSSEC.  Servers that support DNSSEC are supposed
@@ -803,16 +803,16 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that EDNS version 1 DNSSEC queries work (EDNS supported):
 
-    dig +nocookie +edns=1 +noednsneg +noad +norec +dnssec soa \
-        $zone @$server
+   dig +nocookie +edns=1 +noednsneg +noad +norec +dnssec soa \
+       $zone @$server
 
-    expect: status: BADVERS
-    expect: SOA record to not be present
-    expect: OPT record to be present
-    expect: DO=1 to be present if the EDNS version 0 DNSSEC query test
-            returned DO=1
-    expect: EDNS Version 0 in response
-    expect: flag: aa to NOT be present
+   expect: status: BADVERS
+   expect: SOA record to not be present
+   expect: OPT record to be present
+   expect: DO=1 to be present if the EDNS version 0 DNSSEC query test
+           returned DO=1
+   expect: EDNS Version 0 in response
+   expect: flag: aa to NOT be present
 
    +noednsneg disables EDNS version negotiation in DiG.
 
@@ -820,14 +820,14 @@ Internet-Draft             Failure To Respond             September 2016
 
    Check that EDNS queries with multiple defined EDNS options work:
 
-    dig +edns=0 +noad +norec +cookie +nsid +expire +subnet=0.0.0.0/0 \
-        soa $zone @$server
+   dig +edns=0 +noad +norec +cookie +nsid +expire +subnet=0.0.0.0/0 \
+       soa $zone @$server
 
-    expect: status: NOERROR
-    expect: SOA record to be present
-    expect: OPT record to be present
-    expect: EDNS Version 0 in response
-    expect: flag: aa to be present
+   expect: status: NOERROR
+   expect: SOA record to be present
+   expect: OPT record to be present
+   expect: EDNS Version 0 in response
+   expect: flag: aa to be present
 
 8.3.  When EDNS Is Not Supported
 

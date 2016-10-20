@@ -363,7 +363,9 @@ should pass these tests.
 
 ### Is The Server Configured For The Zone?
 
-F> Verify the server is configured for the zone:
+Verify the server is configured for the zone:
+
+{align=left}
 F> ~~~~
 F> dig +noedns +noad +norec soa $zone @$server
 F> 
@@ -374,7 +376,9 @@ F> ~~~~
 
 ### Testing Unknown Types?
 
-F> Check that queries for an unknown type work:
+Check that queries for an unknown type work:
+
+{align=left}
 F> ~~~~
 F> dig +noedns +noad +norec type1000 $zone @$server
 F> 
@@ -382,13 +386,14 @@ F> expect: status: NOERROR
 F> expect: an empty answer section.
 F> expect: flag: aa to be present
 F> ~~~~
-F> That new types are to be expected is specified in Section 3.6,
-[@!RFC1035].  Servers that don't support a new type are expected to reject a
-zone that contains a unsupported type as per Section 5.2, [@!RFC1035].  This
-means that a server that does load a zone can answer questions for unknown
-types with NOERROR or NXDOMAIN as per Section 4.3.2, [@!RFC1034]. [@!RFC6895]
-later reserved distinct ranges for meta and data types which allows servers to
-be definitive about whether a query should be answerable from zone content or
+
+That new types are to be expected is specified in Section 3.6, [@!RFC1035].
+Servers that don't support a new type are expected to reject a zone that
+contains a unsupported type as per Section 5.2, [@!RFC1035].  This means that
+a server that does load a zone can answer questions for unknown types with
+NOERROR or NXDOMAIN as per Section 4.3.2, [@!RFC1034]. [@!RFC6895] later
+reserved distinct ranges for meta and data types which allows servers to be
+definitive about whether a query should be answerable from zone content or
 not.
 
 ### Testing Header Bits
@@ -396,6 +401,7 @@ not.
 
 Check that queries with CD=1 work:
 
+{align=left}
 F> ~~~~
 F> dig +noedns +noad +norec +cd soa $zone @$server
 F> 
@@ -410,6 +416,7 @@ CD use in queries is defined in [@!RFC4035].
 
 Check that queries with AD=1 work:
 
+{align=left}
 F> ~~~~
 F> dig +noedns +norec +ad soa $zone @$server
 F> 
@@ -425,6 +432,7 @@ AD use in queries is defined in [@!RFC6840].
 Check that queries with the last unassigned DNS header flag work and that the
 flag bit is not copied to the response:
 
+{align=left}
 F> ~~~~
 F> dig +noedns +noad +norec +zflag soa $zone @$server
 F> 
@@ -442,6 +450,7 @@ zero in all queries and responses."
 
 Check that new opcodes are handled:
 
+{align=left}
 F> ~~~~
 F> dig +noedns +noad +opcode=15 +norec +header-only @$server
 F> 
@@ -458,6 +467,7 @@ sense to return to a request with a unknown opcode and that is NOTIMP.
 
 Check that TCP queries work:
 
+{align=left}
 F> ~~~~
 F> dig +noedns +noad +norec +tcp soa $zone @$server
 F> 
@@ -479,6 +489,7 @@ query is not a good indicator of lack of EDNS support.
 
 Check that plain EDNS queries work:
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec soa $zone @$server
 F> 
@@ -495,6 +506,7 @@ F> ~~~~
 
 Check that EDNS version 1 queries work (EDNS supported):
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=1 +noednsneg +noad +norec soa $zone @$server
 F> 
@@ -514,6 +526,7 @@ expected rcode if EDNS is supported as per Section 6.1.3, [@!RFC6891].
 
 Check that EDNS queries with an unknown option work (EDNS supported):
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec +ednsopt=100 soa $zone @$server
 F> 
@@ -531,6 +544,7 @@ Unknown EDNS options are supposed to be ignored, Section 6.1.2, [@!RFC6891].
 
 Check that EDNS queries with unknown flags work (EDNS supported):
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec +ednsflags=0x40 soa $zone @$server
 F> 
@@ -549,6 +563,7 @@ as per Section 6.1.4, [@!RFC6891].
 
 Check that EDNS version 1 queries with unknown flags work (EDNS supported):
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=1 +noednsneg +noad +norec +ednsflags=0x40 soa \
 F>     $zone @$server
@@ -568,6 +583,7 @@ presence indicates the flag bit has been incorrectly copied.
 
 Check that EDNS version 1 queries with unknown options work (EDNS supported):
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=1 +noednsneg +noad +norec +ednsopt=100 soa \
 F>     $zone @$server
@@ -586,6 +602,7 @@ F> ~~~~
 
 Check that a DNSSEC queries work (EDNS supported):
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec +dnssec soa $zone @$server
 F> 
@@ -605,6 +622,7 @@ from the request to the response as per [@!RFC3225].
 
 Check that EDNS version 1 DNSSEC queries work (EDNS supported):
 
+{align=left}
 F> ~~~~
 F> dig +nocookie +edns=1 +noednsneg +noad +norec +dnssec soa \
 F>     $zone @$server
@@ -624,6 +642,7 @@ F> ~~~~
 
 Check that EDNS queries with multiple defined EDNS options work:
 
+{align=left}
 F> ~~~~
 F> dig +edns=0 +noad +norec +cookie +nsid +expire +subnet=0.0.0.0/0 \
 F>     soa $zone @$server

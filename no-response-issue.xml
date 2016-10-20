@@ -401,7 +401,7 @@ should pass these tests.
 <t>Verify the server is configured for the zone:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +noedns +noad +norec soa $zone @$server
 
 expect: status: NOERROR
@@ -414,20 +414,20 @@ expect: flag: aa to be present
 <t>Check that queries for an unknown type work:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +noedns +noad +norec type1000 $zone @$server
 
 expect: status: NOERROR
 expect: an empty answer section.
 expect: flag: aa to be present
 </artwork></figure>
-<t>That new types are to be expected is specified in Section 3.6,
-<xref target="RFC1035"/>.  Servers that don't support a new type are expected to reject a
-zone that contains a unsupported type as per Section 5.2, <xref target="RFC1035"/>.  This
-means that a server that does load a zone can answer questions for unknown
-types with NOERROR or NXDOMAIN as per Section 4.3.2, <xref target="RFC1034"/>. <xref target="RFC6895"/>
-later reserved distinct ranges for meta and data types which allows servers to
-be definitive about whether a query should be answerable from zone content or
+<t>That new types are to be expected is specified in Section 3.6, <xref target="RFC1035"/>.
+Servers that don't support a new type are expected to reject a zone that
+contains a unsupported type as per Section 5.2, <xref target="RFC1035"/>.  This means that
+a server that does load a zone can answer questions for unknown types with
+NOERROR or NXDOMAIN as per Section 4.3.2, <xref target="RFC1034"/>. <xref target="RFC6895"/> later
+reserved distinct ranges for meta and data types which allows servers to be
+definitive about whether a query should be answerable from zone content or
 not.
 </t>
 </section>
@@ -438,7 +438,7 @@ not.
 <t>Check that queries with CD=1 work:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +noedns +noad +norec +cd soa $zone @$server
 
 expect: status: NOERROR
@@ -453,7 +453,7 @@ expect: flag: aa to be present
 <t>Check that queries with AD=1 work:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +noedns +norec +ad soa $zone @$server
 
 expect: status: NOERROR
@@ -469,7 +469,7 @@ expect: flag: aa to be present
 flag bit is not copied to the response:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +noedns +noad +norec +zflag soa $zone @$server
 
 expect: status: NOERROR
@@ -488,7 +488,7 @@ zero in all queries and responses.&quot;
 <t>Check that new opcodes are handled:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +noedns +noad +opcode=15 +norec +header-only @$server
 
 expect: status: NOTIMP
@@ -505,7 +505,7 @@ sense to return to a request with a unknown opcode and that is NOTIMP.
 <t>Check that TCP queries work:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +noedns +noad +norec +tcp soa $zone @$server
 
 expect: status: NOERROR
@@ -528,7 +528,7 @@ query is not a good indicator of lack of EDNS support.
 <t>Check that plain EDNS queries work:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=0 +noad +norec soa $zone @$server
 
 expect: status: NOERROR
@@ -545,7 +545,7 @@ expect: flag: aa to be present
 <t>Check that EDNS version 1 queries work (EDNS supported):
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=1 +noednsneg +noad +norec soa $zone @$server
 
 expect: status: BADVERS
@@ -564,7 +564,7 @@ expected rcode if EDNS is supported as per Section 6.1.3, <xref target="RFC6891"
 <t>Check that EDNS queries with an unknown option work (EDNS supported):
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=0 +noad +norec +ednsopt=100 soa $zone @$server
 
 expect: status: NOERROR
@@ -582,7 +582,7 @@ expect: flag: aa to be present
 <t>Check that EDNS queries with unknown flags work (EDNS supported):
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=0 +noad +norec +ednsflags=0x40 soa $zone @$server
 
 expect: status: NOERROR
@@ -601,7 +601,7 @@ as per Section 6.1.4, <xref target="RFC6891"/>.
 <t>Check that EDNS version 1 queries with unknown flags work (EDNS supported):
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=1 +noednsneg +noad +norec +ednsflags=0x40 soa \
     $zone @$server
 
@@ -621,7 +621,7 @@ presence indicates the flag bit has been incorrectly copied.
 <t>Check that EDNS version 1 queries with unknown options work (EDNS supported):
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=1 +noednsneg +noad +norec +ednsopt=100 soa \
     $zone @$server
 
@@ -640,7 +640,7 @@ expect: flag: aa to be present
 <t>Check that a DNSSEC queries work (EDNS supported):
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=0 +noad +norec +dnssec soa $zone @$server
 
 expect: status: NOERROR
@@ -660,7 +660,7 @@ from the request to the response as per <xref target="RFC3225"/>.
 <t>Check that EDNS version 1 DNSSEC queries work (EDNS supported):
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +nocookie +edns=1 +noednsneg +noad +norec +dnssec soa \
     $zone @$server
 
@@ -680,7 +680,7 @@ expect: flag: aa to NOT be present
 <t>Check that EDNS queries with multiple defined EDNS options work:
 </t>
 
-<figure align="center"><artwork align="center">
+<figure align="left"><artwork align="left">
 dig +edns=0 +noad +norec +cookie +nsid +expire +subnet=0.0.0.0/0 \
     soa $zone @$server
 
