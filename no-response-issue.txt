@@ -855,6 +855,13 @@ Internet-Draft             Failure To Respond             September 2016
    be run when new systems are brought online, and should be repeated
    periodically to ensure continued interoperability.
 
+   Domain registrants who do not maintain their own DNS infrastructure
+   are entitled to a DNS service that conforms to standards and
+   interoperates well.  Registrants who become aware that their DNS
+   operator does not have a well maintained or compliant infrastructure
+   should insist that their service provider correct issues, and switch
+   providers if they do not.
+
    In the event that an operator experiences problems due to the
    behaviour of name servers outside their control, the above tests will
    help in narrowing down the precise issue(s) which can then be
@@ -883,13 +890,6 @@ Internet-Draft             Failure To Respond             September 2016
    notification or remediation depending on whether they have a direct
    relationship with the child operator.  Many TLD registries, for
    example, cannot directly contact their registrants and may instead
-   need to communicate through the relevant registrar.  In such cases it
-   may be most efficient for registrars to take on the responsibility
-   for testing the name servers of their registrants, since they have a
-   direct relationship.
-
-   When notification is not effective at correcting problems with a
-   misbehaving name server, parent operators can choose to remove NS
 
 
 
@@ -898,6 +898,13 @@ Andrews                  Expires March 22, 2017                [Page 16]
 Internet-Draft             Failure To Respond             September 2016
 
 
+   need to communicate through the relevant registrar.  In such cases it
+   may be most efficient for registrars to take on the responsibility
+   for testing the name servers of their registrants, since they have a
+   direct relationship.
+
+   When notification is not effective at correcting problems with a
+   misbehaving name server, parent operators can choose to remove NS
    records that refer to the faulty server.  This should only be done as
    a last resort and with due consideration, as removal of a delegation
    can have unanticipated side effects.  For example, other parts of the
@@ -937,14 +944,7 @@ Internet-Draft             Failure To Respond             September 2016
               specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
               November 1987, <http://www.rfc-editor.org/info/rfc1035>.
 
-   [RFC3225]  Conrad, D., "Indicating Resolver Support of DNSSEC",
-              RFC 3225, DOI 10.17487/RFC3225, December 2001,
-              <http://www.rfc-editor.org/info/rfc3225>.
 
-   [RFC4035]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
-              Rose, "Protocol Modifications for the DNS Security
-              Extensions", RFC 4035, DOI 10.17487/RFC4035, March 2005,
-              <http://www.rfc-editor.org/info/rfc4035>.
 
 
 
@@ -954,14 +954,23 @@ Andrews                  Expires March 22, 2017                [Page 17]
 Internet-Draft             Failure To Respond             September 2016
 
 
+   [RFC3225]  Conrad, D., "Indicating Resolver Support of DNSSEC", RFC
+              3225, DOI 10.17487/RFC3225, December 2001,
+              <http://www.rfc-editor.org/info/rfc3225>.
+
+   [RFC4035]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
+              Rose, "Protocol Modifications for the DNS Security
+              Extensions", RFC 4035, DOI 10.17487/RFC4035, March 2005,
+              <http://www.rfc-editor.org/info/rfc4035>.
+
    [RFC6840]  Weiler, S., Ed. and D. Blacka, Ed., "Clarifications and
               Implementation Notes for DNS Security (DNSSEC)", RFC 6840,
               DOI 10.17487/RFC6840, February 2013,
               <http://www.rfc-editor.org/info/rfc6840>.
 
    [RFC6891]  Damas, J., Graff, M., and P. Vixie, "Extension Mechanisms
-              for DNS (EDNS(0))", STD 75, RFC 6891,
-              DOI 10.17487/RFC6891, April 2013,
+              for DNS (EDNS(0))", STD 75, RFC 6891, DOI 10.17487/
+              RFC6891, April 2013,
               <http://www.rfc-editor.org/info/rfc6891>.
 
    [RFC6895]  Eastlake 3rd, D., "Domain Name System (DNS) IANA
@@ -991,15 +1000,6 @@ Author's Address
    Internet Systems Consortium
 
    Email: marka@isc.org
-
-
-
-
-
-
-
-
-
 
 
 

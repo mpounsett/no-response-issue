@@ -713,6 +713,12 @@ for compliance to standards. The above tests should be run when new systems
 are brought online, and should be repeated periodically to ensure continued
 interoperability.
 </t>
+<t>Domain registrants who do not maintain their own DNS infrastructure are
+entitled to a DNS service that conforms to standards and interoperates well.
+Registrants who become aware that their DNS operator does not have a well
+maintained or compliant infrastructure should insist that their service
+provider correct issues, and switch providers if they do not.
+</t>
 <t>In the event that an operator experiences problems due to the behaviour of
 name servers outside their control, the above tests will help in narrowing
 down the precise issue(s) which can then be reported to the relevant party.
