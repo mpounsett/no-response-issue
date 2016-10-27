@@ -880,7 +880,7 @@ Internet-Draft             Failure To Respond             September 2016
       information for the parent domain of the name of the misbehaving
       server, or for zones for which the name server is authoritative
 
-   o  the registarar or registry for such zones
+   o  the registrar or registry for such zones
 
    o  DNS-specific operational fora (e.g. mailing lists)
 

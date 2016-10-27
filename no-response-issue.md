@@ -671,7 +671,7 @@ misbehaviour.
 Name server operators are generally expected to test their own infrastructure
 for compliance to standards. The above tests should be run when new systems
 are brought online, and should be repeated periodically to ensure continued
-interoperability.  
+interoperability.
 
 Domain registrants who do not maintain their own DNS infrastructure are
 entitled to a DNS service that conforms to standards and interoperates well.
@@ -691,7 +691,7 @@ already known, the following methods of communication could be considered:
 - administrative or technical contacts listed in the registration information
   for the parent domain of the name of the misbehaving server, or for zones
   for which the name server is authoritative
-- the registarar or registry for such zones
+- the registrar or registry for such zones
 - DNS-specific operational fora (e.g. mailing lists)
 
 Operators of parent zones may wish to regularly test the authoritative name
