@@ -1,13 +1,13 @@
 % Title =  "A Common Operational Problem in DNS Servers - Failure To Respond."
 % abbrev = "Failure To Respond"
 % category = "bcp"
-% docName = "draft-ietf-dnsop-no-response-issue-05"
+% docName = "draft-ietf-dnsop-no-response-issue-06"
 % ipr = "trust200902"
 % area = "OPS"
 % workgroup = ""
 % keyword = []
 %
-% date = 2016-09-18T00:00:00Z
+% date = 2016-10-27T00:00:00Z
 %
 % [[author]]
 % initials = "M."
@@ -30,7 +30,7 @@ The DNS is a query / response protocol.  Failure to respond or to respond
 correctly to queries causes both immediate operational problems and long term
 problems with protocol development.
 
-This document identifies a number of common kinds of queries which some
+This document identifies a number of common kinds of queries to which some
 servers either fail to respond or else respond incorrectly.  This document
 also suggests procedures for TLD and other zone operators to apply to help
 reduce / eliminate the problem.
@@ -46,20 +46,22 @@ The DNS [@!RFC1034], [@!RFC1035] is a query / response protocol.  Failure to
 respond to queries or to respond incorrectly causes both immediate operational
 problems and long term problems with protocol development.
 
-Failure to respond to a query is indistinguishable from a packet loss.
-Without doing a analysis of query response patterns will results in
-unnecessary additional queries being made by DNS clients, and delays being
+Failure to respond to a query is indistinguishable from a packet loss without
+doing a analysis of query response patterns.  Additionally failure to respond
+results in unnecessary queries being made by DNS clients, and delays being
 introduced to the resolution process.
 
 Due to the inability to distinguish between packet loss and nameservers
 dropping EDNS [@!RFC6891] queries, packet loss is sometimes misclassified as
 lack of EDNS support which can lead to DNSSEC validation failures.
 
-Servers which fail to respond to queries to remain results in developers being
-hesitant to deploy new standards.  Such servers need to be identified.
+Servers which fail to respond to queries results in developers being hesitant
+to deploy new standards.  Such servers need to be identified.
 
 The DNS has response codes that cover almost any conceivable query response.
 A nameserver should be able to respond to any conceivable query using them.
+There should be no need to drop queries because a nameserver does not
+understand them.
 
 Unless a nameserver is under attack, it should respond to all queries directed
 to it.  Additionally, the nameserver should not assume that there isn't a
@@ -81,38 +83,55 @@ forced to guess whether EDNS queries are accepted or not.  While there is
 still a pool of servers that don't respond to EDNS requests, clients have no
 way to know if the lack of response is due to packet loss, EDNS packets not
 being supported or rate limiting due to the server being under attack.
-Mis-classifications of server characteristics are unavoidable when rate
-limiting is done.
+Misclassification of server behaviour is unavoidable when rate limiting is
+used until the population of servers which fail to respond to well formed
+queries drops to near zero.
 
 # Consequences
 
-Lack of following the relevant RFCs has lead to various consequences.  Some as
-a direct result and some from recursive servers try to work around the non
-compliance.  Fixing known issues know will reduce future consequences as DNS
-clients make use of the features available in the DNS protocol.
+Not following the relevant DNS RFCs has multiple adverse
+consequences.  Some resulting directly from the non-compliant
+behaviour and others as a result of work-arounds forced on recursive
+servers.  Addressing known issues now will reduce future
+interoperability issues as the DNS protocol continues to evolve and
+clients make use of newly introduced DNS features.
 
-The AD flag bit in a response cannot be trusted to mean anything as servers
-incorrectly copied the flag bit from the request to the response despite the
-prohibition.
+Some examples of known consequences include:
 
-Wide spread non response to EDNS queries has lead to recursive servers having
-to assume EDNS may not supported and fallback to plain DNS is required.
-Servers get incorrectly diagnosed as not supporting EDNS and when they also
-serve signed zones DNSSEC validation fails.
+* The AD flag bit in a response cannot be trusted to mean anything as many
+  servers incorrectly copied the flag bit from the request to the response
+  despite the prohibition.
 
-Similarly, wide spread non response to EDNS options, requires recursive
-servers to have to decide whether to probe to see if it is the EDNS option or
-just EDNS that is causing the non response.  In the limited amount of time
-required to resolve a query before the client times out this is not possible.
+* Widespread non response to EDNS queries has lead to recursive servers having
+  to assume EDNS may not supported and that fallback to plain DNS is required.
+  Servers get incorrectly diagnosed as not supporting EDNS and when they also
+  serve signed zones DNSSEC validation fails.
 
-Similarly, incorrectly returning FORMERR to a EDNS option being present, leads
-to the recursive server not being able to determine if the server is just
-broken in the handling of the EDNS option or doesn't support EDNS at all.
+* Widespread non response to EDNS options, requires recursive servers to have
+  to decide whether to probe to see if it is the EDNS option or just EDNS that
+  is causing the non response.  In the limited amount of time required to
+  resolve a query before the client times out this is not possible.
 
-The consequences of servers not following the RFCs will only expand if
+* Incorrectly returning FORMERR to a EDNS option being present, leads to the
+  recursive server not being able to determine if the server is just broken in
+  the handling of the EDNS option or doesn't support EDNS at all.
+
+* Mishandling of unknown query types has contributed to the abandoning of the
+  transition of the SPF type.
+
+* Mishandling of unknown query types has slowed up the development of DANE and
+  and result in additional rules being specified to reduce the probability of
+  interacting with a broken server when making TLSA queries.
+
+The consequences of servers not following the RFCs will only grow if
 measures are not put in place to remove non compliant servers from the
 ecosystem.  Working around issues due to non RFC compliance is not
 sustainable.
+
+Most, if not all, of these consequences could have been avoided if action had
+been taken to remove non compliant servers as soon as people were aware of
+them.  To actively seek out broken implementations and servers and inform
+their developers and operators that they need to fix their servers.
 
 # Common queries kinds that result in non responses.
 
@@ -159,6 +178,11 @@ NOTIMP is the expected rcode to an unknown or unimplemented opcode.
 Note: while new opcodes will most probably use the current layout structure
 for the rest of the message there is no requirement that anything other than
 the DNS header match.
+
+### Recursive Queries
+
+A non-recursive server is supposed to respond to recursive queries as if the
+RD bit is not set.
 
 ### TCP Queries
 
@@ -216,10 +240,24 @@ Some servers fail to respond to EDNS queries with EDNS flags set.  Server
 should ignore EDNS flags they do not understand and should not add them to the
 response [@!RFC6891].
 
+### Truncated EDNS Responses
+
+Some EDNS aware servers fail to include a OPT record when a truncated response
+is sent.  A OPT record is supposed to be included in a truncated response
+[@!RFC6891].
+
+Some EDNS aware server fail to honour the advertised EDNS buffer size and send
+over sized responses.
+
 ### DNSSEC
 
 Servers should be checked to see if they support DNSSEC.  Servers should also
 be checked to see if they support DNSSEC with EDNS.
+
+### EDNS over TCP
+
+Some EDNS aware servers incorrectly limit the TCP response sizes to the
+advertised UDP response size.
 
 # Firewalls and Load Balancers
 
@@ -354,7 +392,7 @@ the delays due to multiple timeouts when the servers do not respond.  There
 are 16 queries directed to each nameserver assuming no packet loss testing
 different aspects of Basic DNS and EDNS.
 
-The tests below use dig from BIND 9.11.0 which is still in development.
+The tests below use dig from BIND 9.11.0.
 
 ## Testing - Basic DNS
 
@@ -370,8 +408,10 @@ F> ~~~~
 F> dig +noedns +noad +norec soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record
+F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
+F> expect: the OPT record to NOT be present
 F> ~~~~
 
 ### Testing Unknown Types?
@@ -385,6 +425,8 @@ F>
 F> expect: status: NOERROR
 F> expect: an empty answer section.
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
+F> expect: the OPT record to NOT be present
 F> ~~~~
 
 That new types are to be expected is specified in Section 3.6, [@!RFC1035].
@@ -406,8 +448,10 @@ F> ~~~~
 F> dig +noedns +noad +norec +cd soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
+F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
+F> expect: the OPT record to NOT be present
 F> ~~~~
 
 CD use in queries is defined in [@!RFC4035].
@@ -421,8 +465,10 @@ F> ~~~~
 F> dig +noedns +norec +ad soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
+F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
+F> expect: the OPT record to NOT be present
 F> ~~~~
 
 AD use in queries is defined in [@!RFC6840].
@@ -437,9 +483,11 @@ F> ~~~~
 F> dig +noedns +noad +norec +zflag soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
-F> expect: MBZ to not be in the response
+F> expect: the SOA record to be present in the answer section
+F> expect: MBZ to NOT be in the response
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
+F> expect: the OPT record to NOT be present
 F> ~~~~
 
 MBZ (Must Be Zero) presence indicates the flag bit has been incorrectly
@@ -455,13 +503,31 @@ F> ~~~~
 F> dig +noedns +noad +opcode=15 +norec +header-only @$server
 F> 
 F> expect: status: NOTIMP
-F> expect: SOA record to not be present
+F> expect: SOA record to NOT be present
 F> expect: flag: aa to NOT be present
+F> expect: flag: ad to NOT be present
+F> expect: the OPT record to NOT be present
 F> ~~~~
 
 As unknown opcodes have no definition, including packet format other than
 there must be a DNS header present, there is only one possible rcode that make
 sense to return to a request with a unknown opcode and that is NOTIMP.
+
+### Testing Rescursive Queries
+
+Check that recursive queries work:
+
+{align=left}
+F> ~~~~
+F> dig +noedns +noad +rec soa $zone @$server
+F> 
+F> expect: status: NOERROR
+F> expect: the SOA record to be present in the answer section
+F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
+F> expect: flag: rd to be present
+F> expect: the OPT record to NOT be present
+F> ~~~~
 
 ### Testing TCP
 
@@ -472,8 +538,10 @@ F> ~~~~
 F> dig +noedns +noad +norec +tcp soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record
+F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
+F> expect: the OPT record to NOT be present
 F> ~~~~
 
 The requirement that TCP be supported is defined in [@!RFC7766].
@@ -494,10 +562,11 @@ F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
-F> expect: OPT record to be present
+F> expect: the SOA record to be present in the answer section
+F> expect: a OPT record to be present in the additional section
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
 F> ~~~~
 
 +nocookie disables sending a EDNS COOKIE option in which is on by default.
@@ -511,10 +580,11 @@ F> ~~~~
 F> dig +nocookie +edns=1 +noednsneg +noad +norec soa $zone @$server
 F> 
 F> expect: status: BADVERS
-F> expect: SOA record to not be present
-F> expect: OPT record to be present
+F> expect: the SOA record to NOT be present in the answer section
+F> expect: a OPT record to be present in the additional section
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to NOT be present
+F> expect: flag: ad to NOT be present
 F> ~~~~
 
 Only EDNS Version 0 is currently defined so the response should always be a 0
@@ -531,11 +601,12 @@ F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec +ednsopt=100 soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
-F> expect: OPT record to be present
-F> expect: OPT=100 to not be present
+F> expect: the SOA record to be present in the answer section
+F> expect: a OPT record to be present in the additional section
+F> expect: OPT=100 to NOT be present
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
 F> ~~~~
 
 Unknown EDNS options are supposed to be ignored, Section 6.1.2, [@!RFC6891].
@@ -549,12 +620,15 @@ F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec +ednsflags=0x40 soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
-F> expect: OPT record to be present
+F> expect: the SOA record to be present in the answer section
+F> expect: a OPT record to be present in the additional section
 F> expect: MBZ not to be present
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
 F> ~~~~
+
+
 
 MBZ (Must Be Zero) presence indicates the flag bit has been incorrectly copied
 as per Section 6.1.4, [@!RFC6891].
@@ -570,10 +644,11 @@ F>     $zone @$server
 F> 
 F> expect: status: BADVERS
 F> expect: SOA record to NOT be present
-F> expect: OPT record to be present
+F> expect: a OPT record to be present in the additional section
 F> expect: MBZ not to be present
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to NOT be present
+F> expect: flag: ad to NOT be present
 F> ~~~~
 
 +noednsneg disables EDNS version negotiation in DiG; MBZ (Must Be Zero)
@@ -590,10 +665,11 @@ F>     $zone @$server
 F> 
 F> expect: status: BADVERS
 F> expect: SOA record to NOT be present
-F> expect: OPT record to be present
+F> expect: a OPT record to be present in the additional section
 F> expect: OPT=100 to NOT be present
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
 F> ~~~~
 
 +noednsneg disables EDNS version negotiation in DiG.
@@ -607,8 +683,8 @@ F> ~~~~
 F> dig +nocookie +edns=0 +noad +norec +dnssec soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
-F> expect: OPT record to be present
+F> expect: the SOA record to be present in the answer section
+F> expect: a OPT record to be present in the additional section
 F> expect: DO=1 to be present if a RRSIG is in the response
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to be present
@@ -628,8 +704,8 @@ F> dig +nocookie +edns=1 +noednsneg +noad +norec +dnssec soa \
 F>     $zone @$server
 F> 
 F> expect: status: BADVERS
-F> expect: SOA record to not be present
-F> expect: OPT record to be present
+F> expect: SOA record to NOT be present
+F> expect: a OPT record to be present in the additional section
 F> expect: DO=1 to be present if the EDNS version 0 DNSSEC query test
 F>         returned DO=1
 F> expect: EDNS Version 0 in response
@@ -648,10 +724,11 @@ F> dig +edns=0 +noad +norec +cookie +nsid +expire +subnet=0.0.0.0/0 \
 F>     soa $zone @$server
 F> 
 F> expect: status: NOERROR
-F> expect: SOA record to be present
-F> expect: OPT record to be present
+F> expect: the SOA record to be present in the answer section
+F> expect: a OPT record to be present in the additional section
 F> expect: EDNS Version 0 in response
 F> expect: flag: aa to be present
+F> expect: flag: ad to NOT be present
 F> ~~~~
 
 ## When EDNS Is Not Supported
@@ -704,12 +781,12 @@ may be most efficient for registrars to take on the responsibility for testing
 the name servers of their registrants, since they have a direct relationship.
 
 When notification is not effective at correcting problems with a misbehaving
-name server, parent operators can choose to remove NS records that refer to
-the faulty server.  This should only be done as a last resort and with due
-consideration, as removal of a delegation can have unanticipated side effects.
-For example, other parts of the DNS tree may depend on names below the removed
-zone cut, and the parent operator may find themselves responsible for causing
-new DNS failures to occur.
+name server, parent operators can choose to remove NS record sets (and glue
+records below) that refer to the faulty server.  This should only be done as a
+last resort and with due consideration, as removal of a delegation can have
+unanticipated side effects.  For example, other parts of the DNS tree may
+depend on names below the removed zone cut, and the parent operator may find
+themselves responsible for causing new DNS failures to occur.
 
 # Security Considerations
 
