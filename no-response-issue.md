@@ -1,13 +1,13 @@
 % Title =  "A Common Operational Problem in DNS Servers - Failure To Respond."
 % abbrev = "Failure To Respond"
 % category = "bcp"
-% docName = "draft-ietf-dnsop-no-response-issue-06"
+% docName = "draft-ietf-dnsop-no-response-issue-08"
 % ipr = "trust200902"
 % area = "OPS"
 % workgroup = ""
 % keyword = []
 %
-% date = 2016-10-27T00:00:00Z
+% date = 2017-03-03T00:00:00Z
 %
 % [[author]]
 % initials = "M."
@@ -18,6 +18,7 @@
 % abbrev = "ISC"
 %   [author.address]
 %   email = "marka@isc.org"
+%   [author.address.postal]
 %   street = "950 Charter Street"
 %   city = "Redwood City"
 %   region = "CA"
@@ -401,6 +402,14 @@ should pass these tests.
 
 ### Is The Server Configured For The Zone?
 
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set and without EDNS.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, RA may also be set [@!RFC1034].  We do not expect a OPT record to be
+returned [@!RFC6891].
+
 Verify the server is configured for the zone:
 
 {align=left}
@@ -410,11 +419,22 @@ F>
 F> expect: status: NOERROR
 F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
+F> expect: flag: rd to NOT be present
 F> expect: flag: ad to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
 
-### Testing Unknown Types?
+### Testing Unknown Types
+
+Ask for the TYPE1000 record at the zone's name.  This query is made with no
+DNS flag bits set and without EDNS.  TYPE1000 has been chosen for this purpose
+as IANA is unlikely to allocate this type in the near future and it is not in
+type space reserved for end user allocation.
+
+We don't expect any records to be returned in the answer section with the
+rcode set to NOERROR and the AA and QR bits to be set in the response, RA may
+also be set [@!RFC1034].  We do not expect a OPT record to be returned
+[@!RFC6891].
 
 Check that queries for an unknown type work:
 
@@ -425,6 +445,7 @@ F>
 F> expect: status: NOERROR
 F> expect: an empty answer section.
 F> expect: flag: aa to be present
+F> expect: flag: rd to NOT be present
 F> expect: flag: ad to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
@@ -439,7 +460,19 @@ definitive about whether a query should be answerable from zone content or
 not.
 
 ### Testing Header Bits
+
 #### Testing CD=1 Queries
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with only the CD DNS flag bit set and all other DNS
+bits clear and without EDNS.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response.  We do not expect a OPT record to be returned.
+
+If the server supports DNSSEC, CD should be set in the response [@!RFC4035]
+otherwise CD should be clear [@!RFC1034].
 
 Check that queries with CD=1 work:
 
@@ -450,6 +483,7 @@ F>
 F> expect: status: NOERROR
 F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
+F> expect: flag: rd to NOT be present
 F> expect: flag: ad to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
@@ -457,6 +491,17 @@ F> ~~~~
 CD use in queries is defined in [@!RFC4035].
 
 #### Testing AD=1 Queries
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with only the AD DNS flag bit set and all other DNS
+bits clear and without EDNS.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response.  We do not expect a OPT record to be returned.
+
+If the server supports DNSSEC, AD may be set in the response [@!RFC6840]
+otherwise AD should be clear [@!RFC1034].
 
 Check that queries with AD=1 work:
 
@@ -467,13 +512,22 @@ F>
 F> expect: status: NOERROR
 F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
-F> expect: flag: ad to NOT be present
+F> expect: flag: rd to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
 
 AD use in queries is defined in [@!RFC6840].
 
 #### Testing Reserved Bit
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with only the final reserved DNS flag bit set and
+all other DNS bits clear and without EDNS.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, RA may be set.  The final reserved bit must not be set [@!RFC1034].
+We do not expect a OPT record to be returned [@!RFC6891].
 
 Check that queries with the last unassigned DNS header flag work and that the
 flag bit is not copied to the response:
@@ -486,6 +540,7 @@ F> expect: status: NOERROR
 F> expect: the SOA record to be present in the answer section
 F> expect: MBZ to NOT be in the response
 F> expect: flag: aa to be present
+F> expect: flag: rd to NOT be present
 F> expect: flag: ad to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
@@ -496,6 +551,10 @@ zero in all queries and responses."
 
 ### Testing Unknown Opcodes
 
+Construct a DNS message that consists of only a DNS header with opcode set to
+15 (currently not allocated), no DNS header bits set and empty question,
+answer, authority and additional sections.
+
 Check that new opcodes are handled:
 
 {align=left}
@@ -505,15 +564,27 @@ F>
 F> expect: status: NOTIMP
 F> expect: SOA record to NOT be present
 F> expect: flag: aa to NOT be present
+F> expect: flag: rd to NOT be present
 F> expect: flag: ad to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
 
 As unknown opcodes have no definition, including packet format other than
-there must be a DNS header present, there is only one possible rcode that make
-sense to return to a request with a unknown opcode and that is NOTIMP.
+there must be a DNS header present (QR, OPCODE and RCODE are the only header
+fields that need to be common across all opcodes, everything else in the
+header can potentially be redefined), there is only one possible rcode that
+make sense to return to a request with a unknown opcode and that is NOTIMP.
 
-### Testing Rescursive Queries
+### Testing Recursive Queries
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with only the RD DNS flag bit set and without
+EDNS.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA, QR and RD bits to be set in the
+response, RA may also be set [@!RFC1034].  We do not expect a OPT record to be
+returned [@!RFC6891].
 
 Check that recursive queries work:
 
@@ -524,12 +595,21 @@ F>
 F> expect: status: NOERROR
 F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
-F> expect: flag: ad to NOT be present
 F> expect: flag: rd to be present
+F> expect: flag: ad to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
 
 ### Testing TCP
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set and without EDNS.  This
+query is to be sent using TCP.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, RA may also be set [@!RFC1034].  We do not expect a OPT record to be
+returned [@!RFC6891].
 
 Check that TCP queries work:
 
@@ -540,6 +620,7 @@ F>
 F> expect: status: NOERROR
 F> expect: the SOA record to be present in the answer section
 F> expect: flag: aa to be present
+F> expect: flag: rd to NOT be present
 F> expect: flag: ad to NOT be present
 F> expect: the OPT record to NOT be present
 F> ~~~~
@@ -555,6 +636,18 @@ query is not a good indicator of lack of EDNS support.
 
 ### Testing Minimal EDNS
 
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 0 is used
+without any EDNS options or EDNS flags set.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, RA may also be set [@!RFC1034].  We expect a OPT record to be
+returned.  There should be no EDNS flags present in the response.  The EDNS
+version field should be zero and there should be no EDNS options present
+[@!RFC6891].
+
+
 Check that plain EDNS queries work:
 
 {align=left}
@@ -569,9 +662,21 @@ F> expect: flag: aa to be present
 F> expect: flag: ad to NOT be present
 F> ~~~~
 
-+nocookie disables sending a EDNS COOKIE option in which is on by default.
++nocookie disables sending a EDNS COOKIE option in which is on by default in
+BIND 9.11.0.
 
 ### Testing EDNS Version Negotiation
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 1 is used
+without any EDNS options or EDNS flags set.
+
+We expect the SOA record for the zone to NOT be returned in the answer section
+with the extended rcode set to BADVERS and the QR bit to be set in the
+response, RA may also be set [RFC1034].  We expect a OPT record to be
+returned.  There should be no EDNS flags present in the response.  The EDNS
+version field should be zero as EDNS versions other than 0 are yet to be
+specified and there should be no EDNS options present [@!RFC6891].
 
 Check that EDNS version 1 queries work (EDNS supported):
 
@@ -594,6 +699,20 @@ expected rcode if EDNS is supported as per Section 6.1.3, [@!RFC6891].
 
 ### Testing Unknown EDNS Options
 
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 0 is used
+without any EDNS flags.  A EDNS option is present with a value from the yet to
+be assigned range.  The unassigned value chosen is 100 and will need to be
+adjusted when IANA assigns this value formally.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, RA may also be set [@!RFC1034].  We expect a OPT record to be
+returned.  There should be no EDNS flags present in the response.  The EDNS
+version field should be zero as EDNS versions other than 0 are yet to be
+specified and there should be no EDNS options present as unknown EDNS options
+are supposed to be ignored by the server [@!RFC6891].
+
 Check that EDNS queries with an unknown option work (EDNS supported):
 
 {align=left}
@@ -612,6 +731,18 @@ F> ~~~~
 Unknown EDNS options are supposed to be ignored, Section 6.1.2, [@!RFC6891].
 
 ### Testing Unknown EDNS Flags
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 0 is used
+without any EDNS options.  A unassigned EDNS flag bit is set (0x40 in this
+case).
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, RA may also be set [@!RFC1034].  We expect a OPT record to be
+returned.  There should be no EDNS flags present in the response as unknown
+EDNS flags are supposed to be ignored.  The EDNS version field should be zero
+and there should be no EDNS options present [@!RFC6891].
 
 Check that EDNS queries with unknown flags work (EDNS supported):
 
@@ -635,6 +766,19 @@ as per Section 6.1.4, [@!RFC6891].
 
 ### Testing EDNS Version Negotiation With Unknown EDNS Flags
 
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 1 is used
+without any EDNS options.  A unassigned EDNS flag bit is set (0x40 in this
+case).
+
+We expect the SOA record for the zone to NOT be returned in the answer section
+with the extended rcode set to BADVERS and the QR bit to be set in the
+response, RA may also be set [@!RFC1034].  We expect a OPT record to be
+returned.  There should be no EDNS flags present in the response as unknown
+EDNS flags are supposed to be ignored.  The EDNS version field should be zero
+as EDNS versions other than 0 are yet to be specified and there should be no
+EDNS options present [@!RFC6891].
+
 Check that EDNS version 1 queries with unknown flags work (EDNS supported):
 
 {align=left}
@@ -656,6 +800,17 @@ presence indicates the flag bit has been incorrectly copied.
 
 ### Testing EDNS Version Negotiation With Unknown EDNS Options
 
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 1 is used.
+A unknown EDNS option is present (option code 100 has been chosen).
+
+We expect the SOA record for the zone to NOT be returned in the answer section
+with the extended rcode set to BADVERS and the QR bit to be set in the
+response, RA may also be set [@!RFC1034].  We expect a OPT record to be
+returned.  There should be no EDNS flags present in the response.  The EDNS
+version field should be zero as EDNS versions other than 0 are yet to be
+specified and there should be no EDNS options present [@!RFC6891].
+
 Check that EDNS version 1 queries with unknown options work (EDNS supported):
 
 {align=left}
@@ -674,7 +829,47 @@ F> ~~~~
 
 +noednsneg disables EDNS version negotiation in DiG.
 
+###  Testing Truncated Responses
+
+Ask for the DNSKEY records of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 0 is used
+without any EDNS options.  The only EDNS flag set is DO.  The EDNS UDP buffer
+size is set to 512.  The intention of this query is elicit a truncated
+response from the server.  Most signed DNSKEY responses are bigger than 512
+bytes.
+
+We expect a response with the rcode set to NOERROR and the AA and QR bits to
+be set, AD may be set in the response if the server supports DNSSEC otherwise
+it should be clear.  TC and RA may also be set [@!RFC1034].  We expect a OPT
+record to be present in the response.  There should be no EDNS flags other
+than DO present in the response.  The EDNS version field should be zero and
+there should be no EDNS options present [@!RFC6891].
+
+If TC is not set it is not possible to confirm that the server correctly adds
+the OPT record to the truncated responses or not.
+
+{align=left}
+F> ~~~~
+F> dig +norec +dnssec +bufsize=512 +ignore dnskey $zone @$server
+F> 
+F> expect: NOERROR
+F> expect: OPT record with version set to 0
+F> ~~~~
+
 ### Testing DNSSEC Queries
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 0 is used
+without any EDNS options.  The only EDNS flag set is DO.
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, AD may be set in the response if the server supports DNSSEC
+otherwise it should be clear.  RA may also be set [@!RFC1034].  We expect a
+OPT record to be returned.  There should be no EDNS flags other than DO
+present in the response which should be present if the server supports DNSSEC.
+The EDNS version field should be zero and there should be no EDNS options
+present [@!RFC6891].
 
 Check that a DNSSEC queries work (EDNS supported):
 
@@ -696,6 +891,17 @@ from the request to the response as per [@!RFC3225].
 
 ### Testing EDNS Version Negotiation With DNSSEC
 
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 1 is used
+without any EDNS options.  The only EDNS flag set is DO.
+
+We expect the SOA record for the zone to NOT be returned in the answer section
+with the rcode set to BADVERS and the only the QR bit and possibly the RA bit
+to be set [@!RFC1034].  We expect a OPT record to be returned.  There should
+be no EDNS flags other than DO present in the response which should be present
+if the server supports DNSSEC.  The EDNS version field should be zero and
+there should be no EDNS options present [@!RFC6891].
+
 Check that EDNS version 1 DNSSEC queries work (EDNS supported):
 
 {align=left}
@@ -715,6 +921,18 @@ F> ~~~~
 +noednsneg disables EDNS version negotiation in DiG.
 
 ### Testing With Multiple Defined EDNS Options
+
+Ask for the SOA record of the zone the server is nominally configured to
+serve.  This query is made with no DNS flag bits set.  EDNS version 0 is used.
+A number of defined EDNS options are present (NSID [@RFC5001], DNS COOKIE
+[@RFC7873], EDNS Client Subnet [@RFC7871] and EDNS Expire [@RFC7314]).
+
+We expect the SOA record for the zone to be returned in the answer section
+with the rcode set to NOERROR and the AA and QR bits to be set in the
+response, RA may also be set [@!RFC1034].  We expect a OPT record to be
+returned.  There should be no EDNS flags present in the response.  The EDNS
+version field should be zero.  Any of the requested EDNS options supported by
+the server and permitted server configuration may be returned [@!RFC6891].
 
 Check that EDNS queries with multiple defined EDNS options work:
 

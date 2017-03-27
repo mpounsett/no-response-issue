@@ -4,12 +4,12 @@
 
 Network Working Group                                         M. Andrews
 Internet-Draft                                                       ISC
-Intended status: Best Current Practice                  October 27, 2016
-Expires: April 30, 2017
+Intended status: Best Current Practice                     March 3, 2017
+Expires: September 4, 2017
 
 
    A Common Operational Problem in DNS Servers - Failure To Respond.
-                 draft-ietf-dnsop-no-response-issue-06
+                 draft-ietf-dnsop-no-response-issue-08
 
 Abstract
 
@@ -40,11 +40,11 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on April 30, 2017.
+   This Internet-Draft will expire on September 4, 2017.
 
 Copyright Notice
 
-   Copyright (c) 2016 IETF Trust and the persons identified as the
+   Copyright (c) 2017 IETF Trust and the persons identified as the
    document authors.  All rights reserved.
 
    This document is subject to BCP 78 and the IETF Trust's Legal
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Andrews                  Expires April 30, 2017                 [Page 1]
+Andrews                 Expires September 4, 2017               [Page 1]
 
-Internet-Draft             Failure To Respond               October 2016
+Internet-Draft             Failure To Respond                 March 2017
 
 
    publication of this document.  Please review these documents
@@ -77,7 +77,7 @@ Table of Contents
        3.1.4.  Unknown DNS opcodes . . . . . . . . . . . . . . . . .   6
        3.1.5.  Recursive Queries . . . . . . . . . . . . . . . . . .   6
        3.1.6.  TCP Queries . . . . . . . . . . . . . . . . . . . . .   6
-     3.2.  EDNS Queries  . . . . . . . . . . . . . . . . . . . . . .   6
+     3.2.  EDNS Queries  . . . . . . . . . . . . . . . . . . . . . .   7
        3.2.1.  EDNS Queries - Version Independent  . . . . . . . . .   7
        3.2.2.  EDNS Queries - Version Specific . . . . . . . . . . .   7
        3.2.3.  EDNS Options  . . . . . . . . . . . . . . . . . . . .   7
@@ -92,38 +92,41 @@ Table of Contents
    8.  Testing . . . . . . . . . . . . . . . . . . . . . . . . . . .  11
      8.1.  Testing - Basic DNS . . . . . . . . . . . . . . . . . . .  11
        8.1.1.  Is The Server Configured For The Zone?  . . . . . . .  11
-       8.1.2.  Testing Unknown Types?  . . . . . . . . . . . . . . .  11
+       8.1.2.  Testing Unknown Types . . . . . . . . . . . . . . . .  11
        8.1.3.  Testing Header Bits . . . . . . . . . . . . . . . . .  12
-       8.1.4.  Testing Unknown Opcodes . . . . . . . . . . . . . . .  13
-       8.1.5.  Testing Rescursive Queries  . . . . . . . . . . . . .  13
-       8.1.6.  Testing TCP . . . . . . . . . . . . . . . . . . . . .  13
-     8.2.  Testing - Extended DNS  . . . . . . . . . . . . . . . . .  14
-       8.2.1.  Testing Minimal EDNS  . . . . . . . . . . . . . . . .  14
-       8.2.2.  Testing EDNS Version Negotiation  . . . . . . . . . .  14
-       8.2.3.  Testing Unknown EDNS Options  . . . . . . . . . . . .  14
-       8.2.4.  Testing Unknown EDNS Flags  . . . . . . . . . . . . .  15
+       8.1.4.  Testing Unknown Opcodes . . . . . . . . . . . . . . .  14
+       8.1.5.  Testing Recursive Queries . . . . . . . . . . . . . .  14
+       8.1.6.  Testing TCP . . . . . . . . . . . . . . . . . . . . .  15
+     8.2.  Testing - Extended DNS  . . . . . . . . . . . . . . . . .  15
+       8.2.1.  Testing Minimal EDNS  . . . . . . . . . . . . . . . .  16
+       8.2.2.  Testing EDNS Version Negotiation  . . . . . . . . . .  16
+       8.2.3.  Testing Unknown EDNS Options  . . . . . . . . . . . .  17
+       8.2.4.  Testing Unknown EDNS Flags  . . . . . . . . . . . . .  18
        8.2.5.  Testing EDNS Version Negotiation With Unknown EDNS
-               Flags . . . . . . . . . . . . . . . . . . . . . . . .  15
+               Flags . . . . . . . . . . . . . . . . . . . . . . . .  18
        8.2.6.  Testing EDNS Version Negotiation With Unknown EDNS
-               Options . . . . . . . . . . . . . . . . . . . . . . .  16
+               Options . . . . . . . . . . . . . . . . . . . . . . .  19
 
 
 
-Andrews                  Expires April 30, 2017                 [Page 2]
+Andrews                 Expires September 4, 2017               [Page 2]
 
-Internet-Draft             Failure To Respond               October 2016
+Internet-Draft             Failure To Respond                 March 2017
 
 
-       8.2.7.  Testing DNSSEC Queries  . . . . . . . . . . . . . . .  16
-       8.2.8.  Testing EDNS Version Negotiation With DNSSEC  . . . .  16
-       8.2.9.  Testing With Multiple Defined EDNS Options  . . . . .  17
-     8.3.  When EDNS Is Not Supported  . . . . . . . . . . . . . . .  17
-   9.  Remediation . . . . . . . . . . . . . . . . . . . . . . . . .  17
-   10. Security Considerations . . . . . . . . . . . . . . . . . . .  19
-   11. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  19
-   12. Normative References  . . . . . . . . . . . . . . . . . . . .  19
-   Appendix A.  Document Source  . . . . . . . . . . . . . . . . . .  20
-   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  20
+       8.2.7.  Testing Truncated Responses . . . . . . . . . . . . .  20
+       8.2.8.  Testing DNSSEC Queries  . . . . . . . . . . . . . . .  20
+       8.2.9.  Testing EDNS Version Negotiation With DNSSEC  . . . .  21
+       8.2.10. Testing With Multiple Defined EDNS Options  . . . . .  21
+     8.3.  When EDNS Is Not Supported  . . . . . . . . . . . . . . .  22
+   9.  Remediation . . . . . . . . . . . . . . . . . . . . . . . . .  22
+   10. Security Considerations . . . . . . . . . . . . . . . . . . .  23
+   11. IANA Considerations . . . . . . . . . . . . . . . . . . . . .  24
+   12. References  . . . . . . . . . . . . . . . . . . . . . . . . .  24
+     12.1.  Normative References . . . . . . . . . . . . . . . . . .  24
+     12.2.  Informative References . . . . . . . . . . . . . . . . .  25
+   Appendix A.  Document Source  . . . . . . . . . . . . . . . . . .  25
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  25
 
 1.  Introduction
 
@@ -159,16 +162,16 @@ Internet-Draft             Failure To Respond               October 2016
    for is not necessarily an indication that the server is under attack.
    Parent zone operators are supposed to regularly check that the
    delegating NS records are consistent with those of the delegated zone
+
+
+
+Andrews                 Expires September 4, 2017               [Page 3]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
    and to correct them when they are not [RFC1034].  Doing this
    regularly should reduce the instances of broken delegations.
-
-
-
-
-Andrews                  Expires April 30, 2017                 [Page 3]
-
-Internet-Draft             Failure To Respond               October 2016
-
 
    When a nameserver is under attack it may wish to drop packets.  A
    common attack is to use a nameserver as a amplifier by sending
@@ -214,17 +217,17 @@ Internet-Draft             Failure To Respond               October 2016
 
    o  Incorrectly returning FORMERR to a EDNS option being present,
       leads to the recursive server not being able to determine if the
+
+
+
+
+Andrews                 Expires September 4, 2017               [Page 4]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
       server is just broken in the handling of the EDNS option or
       doesn't support EDNS at all.
-
-
-
-
-
-Andrews                  Expires April 30, 2017                 [Page 4]
-
-Internet-Draft             Failure To Respond               October 2016
-
 
    o  Mishandling of unknown query types has contributed to the
       abandoning of the transition of the SPF type.
@@ -271,17 +274,16 @@ Internet-Draft             Failure To Respond               October 2016
    query for an A record again.  IANA maintains a registry of allocated
    types.
 
+
+
+
+Andrews                 Expires September 4, 2017               [Page 5]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
    If the server responds to the first and last queries but fails to
    respond to the queries for the unallocated type, it is probably
-
-
-
-
-Andrews                  Expires April 30, 2017                 [Page 5]
-
-Internet-Draft             Failure To Respond               October 2016
-
-
    faulty.  The test should be repeated a number of times to eliminate
    the likelihood of a false positive due to packet loss.
 
@@ -324,7 +326,6 @@ Internet-Draft             Failure To Respond               October 2016
    query should be made over UDP if the TCP connection attempt fails to
    confirm that the server under test is still operating.
 
-3.2.  EDNS Queries
 
 
 
@@ -332,11 +333,12 @@ Internet-Draft             Failure To Respond               October 2016
 
 
 
-
-Andrews                  Expires April 30, 2017                 [Page 6]
+Andrews                 Expires September 4, 2017               [Page 6]
 
-Internet-Draft             Failure To Respond               October 2016
+Internet-Draft             Failure To Respond                 March 2017
 
+
+3.2.  EDNS Queries
 
 3.2.1.  EDNS Queries - Version Independent
 
@@ -387,11 +389,9 @@ Internet-Draft             Failure To Respond               October 2016
 
 
 
-
-
-Andrews                  Expires April 30, 2017                 [Page 7]
+Andrews                 Expires September 4, 2017               [Page 7]
 
-Internet-Draft             Failure To Respond               October 2016
+Internet-Draft             Failure To Respond                 March 2017
 
 
 3.2.5.  Truncated EDNS Responses
@@ -445,9 +445,9 @@ Internet-Draft             Failure To Respond               October 2016
 
 
 
-Andrews                  Expires April 30, 2017                 [Page 8]
+Andrews                 Expires September 4, 2017               [Page 8]
 
-Internet-Draft             Failure To Respond               October 2016
+Internet-Draft             Failure To Respond                 March 2017
 
 
    Requests with unknown EDNS options is expected client behaviour and
@@ -501,9 +501,9 @@ Internet-Draft             Failure To Respond               October 2016
 
 
 
-Andrews                  Expires April 30, 2017                 [Page 9]
+Andrews                 Expires September 4, 2017               [Page 9]
 
-Internet-Draft             Failure To Respond               October 2016
+Internet-Draft             Failure To Respond                 March 2017
 
 
    Whole answer caches can return the wrong response to a query if they
@@ -557,9 +557,9 @@ Internet-Draft             Failure To Respond               October 2016
 
 
 
-Andrews                  Expires April 30, 2017                [Page 10]
+Andrews                 Expires September 4, 2017              [Page 10]
 
-Internet-Draft             Failure To Respond               October 2016
+Internet-Draft             Failure To Respond                 March 2017
 
 
 8.  Testing
@@ -584,6 +584,15 @@ Internet-Draft             Failure To Respond               October 2016
 
 8.1.1.  Is The Server Configured For The Zone?
 
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set and without
+   EDNS.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, RA may also be set [RFC1034].  We do not expect
+   a OPT record to be returned [RFC6891].
+
    Verify the server is configured for the zone:
 
    dig +noedns +noad +norec soa $zone @$server
@@ -591,10 +600,31 @@ Internet-Draft             Failure To Respond               October 2016
    expect: status: NOERROR
    expect: the SOA record to be present in the answer section
    expect: flag: aa to be present
+   expect: flag: rd to NOT be present
    expect: flag: ad to NOT be present
    expect: the OPT record to NOT be present
 
-8.1.2.  Testing Unknown Types?
+8.1.2.  Testing Unknown Types
+
+   Ask for the TYPE1000 record at the zone's name.  This query is made
+   with no DNS flag bits set and without EDNS.  TYPE1000 has been chosen
+   for this purpose as IANA is unlikely to allocate this type in the
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 11]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
+   near future and it is not in type space reserved for end user
+   allocation.
+
+   We don't expect any records to be returned in the answer section with
+   the rcode set to NOERROR and the AA and QR bits to be set in the
+   response, RA may also be set [RFC1034].  We do not expect a OPT
+   record to be returned [RFC6891].
 
    Check that queries for an unknown type work:
 
@@ -603,6 +633,7 @@ Internet-Draft             Failure To Respond               October 2016
    expect: status: NOERROR
    expect: an empty answer section.
    expect: flag: aa to be present
+   expect: flag: rd to NOT be present
    expect: flag: ad to NOT be present
    expect: the OPT record to NOT be present
 
@@ -610,14 +641,6 @@ Internet-Draft             Failure To Respond               October 2016
    [RFC1035].  Servers that don't support a new type are expected to
    reject a zone that contains a unsupported type as per Section 5.2,
    [RFC1035].  This means that a server that does load a zone can answer
-
-
-
-Andrews                  Expires April 30, 2017                [Page 11]
-
-Internet-Draft             Failure To Respond               October 2016
-
-
    questions for unknown types with NOERROR or NXDOMAIN as per
    Section 4.3.2, [RFC1034].  [RFC6895] later reserved distinct ranges
    for meta and data types which allows servers to be definitive about
@@ -627,19 +650,53 @@ Internet-Draft             Failure To Respond               October 2016
 
 8.1.3.1.  Testing CD=1 Queries
 
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with only the CD DNS flag bit set and
+   all other DNS bits clear and without EDNS.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response.  We do not expect a OPT record to be returned.
+
+   If the server supports DNSSEC, CD should be set in the response
+   [RFC4035] otherwise CD should be clear [RFC1034].
+
    Check that queries with CD=1 work:
+
+
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 12]
+
+Internet-Draft             Failure To Respond                 March 2017
+
 
    dig +noedns +noad +norec +cd soa $zone @$server
 
    expect: status: NOERROR
    expect: the SOA record to be present in the answer section
    expect: flag: aa to be present
+   expect: flag: rd to NOT be present
    expect: flag: ad to NOT be present
    expect: the OPT record to NOT be present
 
    CD use in queries is defined in [RFC4035].
 
 8.1.3.2.  Testing AD=1 Queries
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with only the AD DNS flag bit set and
+   all other DNS bits clear and without EDNS.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response.  We do not expect a OPT record to be returned.
+
+   If the server supports DNSSEC, AD may be set in the response
+   [RFC6840] otherwise AD should be clear [RFC1034].
 
    Check that queries with AD=1 work:
 
@@ -648,12 +705,30 @@ Internet-Draft             Failure To Respond               October 2016
    expect: status: NOERROR
    expect: the SOA record to be present in the answer section
    expect: flag: aa to be present
-   expect: flag: ad to NOT be present
+   expect: flag: rd to NOT be present
    expect: the OPT record to NOT be present
 
    AD use in queries is defined in [RFC6840].
 
 8.1.3.3.  Testing Reserved Bit
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with only the final reserved DNS flag
+   bit set and all other DNS bits clear and without EDNS.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, RA may be set.  The final reserved bit must not
+   be set [RFC1034].  We do not expect a OPT record to be returned
+   [RFC6891].
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 13]
+
+Internet-Draft             Failure To Respond                 March 2017
+
 
    Check that queries with the last unassigned DNS header flag work and
    that the flag bit is not copied to the response:
@@ -664,21 +739,19 @@ Internet-Draft             Failure To Respond               October 2016
    expect: the SOA record to be present in the answer section
    expect: MBZ to NOT be in the response
    expect: flag: aa to be present
+   expect: flag: rd to NOT be present
    expect: flag: ad to NOT be present
    expect: the OPT record to NOT be present
-
-
-
-Andrews                  Expires April 30, 2017                [Page 12]
-
-Internet-Draft             Failure To Respond               October 2016
-
 
    MBZ (Must Be Zero) presence indicates the flag bit has been
    incorrectly copied.  See Section 4.1.1, [RFC1035] "Z Reserved for
    future use.  Must be zero in all queries and responses."
 
 8.1.4.  Testing Unknown Opcodes
+
+   Construct a DNS message that consists of only a DNS header with
+   opcode set to 15 (currently not allocated), no DNS header bits set
+   and empty question, answer, authority and additional sections.
 
    Check that new opcodes are handled:
 
@@ -687,15 +760,36 @@ Internet-Draft             Failure To Respond               October 2016
    expect: status: NOTIMP
    expect: SOA record to NOT be present
    expect: flag: aa to NOT be present
+   expect: flag: rd to NOT be present
    expect: flag: ad to NOT be present
    expect: the OPT record to NOT be present
 
    As unknown opcodes have no definition, including packet format other
-   than there must be a DNS header present, there is only one possible
-   rcode that make sense to return to a request with a unknown opcode
-   and that is NOTIMP.
+   than there must be a DNS header present (QR, OPCODE and RCODE are the
+   only header fields that need to be common across all opcodes,
+   everything else in the header can potentially be redefined), there is
+   only one possible rcode that make sense to return to a request with a
+   unknown opcode and that is NOTIMP.
 
-8.1.5.  Testing Rescursive Queries
+8.1.5.  Testing Recursive Queries
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with only the RD DNS flag bit set and
+   without EDNS.
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 14]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA, QR and RD bits to
+   be set in the response, RA may also be set [RFC1034].  We do not
+   expect a OPT record to be returned [RFC6891].
 
    Check that recursive queries work:
 
@@ -704,11 +798,20 @@ Internet-Draft             Failure To Respond               October 2016
    expect: status: NOERROR
    expect: the SOA record to be present in the answer section
    expect: flag: aa to be present
-   expect: flag: ad to NOT be present
    expect: flag: rd to be present
+   expect: flag: ad to NOT be present
    expect: the OPT record to NOT be present
 
 8.1.6.  Testing TCP
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set and without
+   EDNS.  This query is to be sent using TCP.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, RA may also be set [RFC1034].  We do not expect
+   a OPT record to be returned [RFC6891].
 
    Check that TCP queries work:
 
@@ -717,18 +820,11 @@ Internet-Draft             Failure To Respond               October 2016
    expect: status: NOERROR
    expect: the SOA record to be present in the answer section
    expect: flag: aa to be present
+   expect: flag: rd to NOT be present
    expect: flag: ad to NOT be present
    expect: the OPT record to NOT be present
 
    The requirement that TCP be supported is defined in [RFC7766].
-
-
-
-
-Andrews                  Expires April 30, 2017                [Page 13]
-
-Internet-Draft             Failure To Respond               October 2016
-
 
 8.2.  Testing - Extended DNS
 
@@ -738,7 +834,26 @@ Internet-Draft             Failure To Respond               October 2016
    correctly so a plain EDNS query is not a good indicator of lack of
    EDNS support.
 
+
+
+
+Andrews                 Expires September 4, 2017              [Page 15]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
 8.2.1.  Testing Minimal EDNS
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 0 is used without any EDNS options or EDNS flags set.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, RA may also be set [RFC1034].  We expect a OPT
+   record to be returned.  There should be no EDNS flags present in the
+   response.  The EDNS version field should be zero and there should be
+   no EDNS options present [RFC6891].
 
    Check that plain EDNS queries work:
 
@@ -752,11 +867,36 @@ Internet-Draft             Failure To Respond               October 2016
    expect: flag: ad to NOT be present
 
    +nocookie disables sending a EDNS COOKIE option in which is on by
-   default.
+   default in BIND 9.11.0.
 
 8.2.2.  Testing EDNS Version Negotiation
 
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 1 is used without any EDNS options or EDNS flags set.
+
+   We expect the SOA record for the zone to NOT be returned in the
+   answer section with the extended rcode set to BADVERS and the QR bit
+   to be set in the response, RA may also be set [RFC1034].  We expect a
+   OPT record to be returned.  There should be no EDNS flags present in
+   the response.  The EDNS version field should be zero as EDNS versions
+   other than 0 are yet to be specified and there should be no EDNS
+   options present [RFC6891].
+
    Check that EDNS version 1 queries work (EDNS supported):
+
+
+
+
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 16]
+
+Internet-Draft             Failure To Respond                 March 2017
+
 
    dig +nocookie +edns=1 +noednsneg +noad +norec soa $zone @$server
 
@@ -774,17 +914,23 @@ Internet-Draft             Failure To Respond               October 2016
 
 8.2.3.  Testing Unknown EDNS Options
 
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 0 is used without any EDNS flags.  A EDNS option is present
+   with a value from the yet to be assigned range.  The unassigned value
+   chosen is 100 and will need to be adjusted when IANA assigns this
+   value formally.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, RA may also be set [RFC1034].  We expect a OPT
+   record to be returned.  There should be no EDNS flags present in the
+   response.  The EDNS version field should be zero as EDNS versions
+   other than 0 are yet to be specified and there should be no EDNS
+   options present as unknown EDNS options are supposed to be ignored by
+   the server [RFC6891].
+
    Check that EDNS queries with an unknown option work (EDNS supported):
-
-
-
-
-
-
-Andrews                  Expires April 30, 2017                [Page 14]
-
-Internet-Draft             Failure To Respond               October 2016
-
 
    dig +nocookie +edns=0 +noad +norec +ednsopt=100 soa $zone @$server
 
@@ -799,7 +945,29 @@ Internet-Draft             Failure To Respond               October 2016
    Unknown EDNS options are supposed to be ignored, Section 6.1.2,
    [RFC6891].
 
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 17]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
 8.2.4.  Testing Unknown EDNS Flags
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 0 is used without any EDNS options.  A unassigned EDNS flag
+   bit is set (0x40 in this case).
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, RA may also be set [RFC1034].  We expect a OPT
+   record to be returned.  There should be no EDNS flags present in the
+   response as unknown EDNS flags are supposed to be ignored.  The EDNS
+   version field should be zero and there should be no EDNS options
+   present [RFC6891].
 
    Check that EDNS queries with unknown flags work (EDNS supported):
 
@@ -818,8 +986,29 @@ Internet-Draft             Failure To Respond               October 2016
 
 8.2.5.  Testing EDNS Version Negotiation With Unknown EDNS Flags
 
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 1 is used without any EDNS options.  A unassigned EDNS flag
+   bit is set (0x40 in this case).
+
+   We expect the SOA record for the zone to NOT be returned in the
+   answer section with the extended rcode set to BADVERS and the QR bit
+   to be set in the response, RA may also be set [RFC1034].  We expect a
+   OPT record to be returned.  There should be no EDNS flags present in
+   the response as unknown EDNS flags are supposed to be ignored.  The
+   EDNS version field should be zero as EDNS versions other than 0 are
+   yet to be specified and there should be no EDNS options present
+   [RFC6891].
+
    Check that EDNS version 1 queries with unknown flags work (EDNS
    supported):
+
+
+
+Andrews                 Expires September 4, 2017              [Page 18]
+
+Internet-Draft             Failure To Respond                 March 2017
+
 
    dig +nocookie +edns=1 +noednsneg +noad +norec +ednsflags=0x40 soa \
        $zone @$server
@@ -835,14 +1024,20 @@ Internet-Draft             Failure To Respond               October 2016
    +noednsneg disables EDNS version negotiation in DiG; MBZ (Must Be
    Zero) presence indicates the flag bit has been incorrectly copied.
 
-
-
-Andrews                  Expires April 30, 2017                [Page 15]
-
-Internet-Draft             Failure To Respond               October 2016
-
-
 8.2.6.  Testing EDNS Version Negotiation With Unknown EDNS Options
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 1 is used.  A unknown EDNS option is present (option code 100
+   has been chosen).
+
+   We expect the SOA record for the zone to NOT be returned in the
+   answer section with the extended rcode set to BADVERS and the QR bit
+   to be set in the response, RA may also be set [RFC1034].  We expect a
+   OPT record to be returned.  There should be no EDNS flags present in
+   the response.  The EDNS version field should be zero as EDNS versions
+   other than 0 are yet to be specified and there should be no EDNS
+   options present [RFC6891].
 
    Check that EDNS version 1 queries with unknown options work (EDNS
    supported):
@@ -860,9 +1055,72 @@ Internet-Draft             Failure To Respond               October 2016
 
    +noednsneg disables EDNS version negotiation in DiG.
 
-8.2.7.  Testing DNSSEC Queries
+
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 19]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
+8.2.7.  Testing Truncated Responses
+
+   Ask for the DNSKEY records of the zone the server is nominally
+   configured to serve.  This query is made with no DNS flag bits set.
+   EDNS version 0 is used without any EDNS options.  The only EDNS flag
+   set is DO.  The EDNS UDP buffer size is set to 512.  The intention of
+   this query is elicit a truncated response from the server.  Most
+   signed DNSKEY responses are bigger than 512 bytes.
+
+   We expect a response with the rcode set to NOERROR and the AA and QR
+   bits to be set, AD may be set in the response if the server supports
+   DNSSEC otherwise it should be clear.  TC and RA may also be set
+   [RFC1034].  We expect a OPT record to be present in the response.
+   There should be no EDNS flags other than DO present in the response.
+   The EDNS version field should be zero and there should be no EDNS
+   options present [RFC6891].
+
+   If TC is not set it is not possible to confirm that the server
+   correctly adds the OPT record to the truncated responses or not.
+
+   dig +norec +dnssec +bufsize=512 +ignore dnskey $zone @$server
+
+   expect: NOERROR
+   expect: OPT record with version set to 0
+
+8.2.8.  Testing DNSSEC Queries
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 0 is used without any EDNS options.  The only EDNS flag set
+   is DO.
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, AD may be set in the response if the server
+   supports DNSSEC otherwise it should be clear.  RA may also be set
+   [RFC1034].  We expect a OPT record to be returned.  There should be
+   no EDNS flags other than DO present in the response which should be
+   present if the server supports DNSSEC.  The EDNS version field should
+   be zero and there should be no EDNS options present [RFC6891].
 
    Check that a DNSSEC queries work (EDNS supported):
+
+
+
+
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 20]
+
+Internet-Draft             Failure To Respond                 March 2017
+
 
    dig +nocookie +edns=0 +noad +norec +dnssec soa $zone @$server
 
@@ -877,26 +1135,22 @@ Internet-Draft             Failure To Respond               October 2016
    the server supports DNSSEC.  Servers that support DNSSEC are supposed
    to copy the DO bit from the request to the response as per [RFC3225].
 
-8.2.8.  Testing EDNS Version Negotiation With DNSSEC
+8.2.9.  Testing EDNS Version Negotiation With DNSSEC
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 1 is used without any EDNS options.  The only EDNS flag set
+   is DO.
+
+   We expect the SOA record for the zone to NOT be returned in the
+   answer section with the rcode set to BADVERS and the only the QR bit
+   and possibly the RA bit to be set [RFC1034].  We expect a OPT record
+   to be returned.  There should be no EDNS flags other than DO present
+   in the response which should be present if the server supports
+   DNSSEC.  The EDNS version field should be zero and there should be no
+   EDNS options present [RFC6891].
 
    Check that EDNS version 1 DNSSEC queries work (EDNS supported):
-
-
-
-
-
-
-
-
-
-
-
-
-
-Andrews                  Expires April 30, 2017                [Page 16]
-
-Internet-Draft             Failure To Respond               October 2016
-
 
    dig +nocookie +edns=1 +noednsneg +noad +norec +dnssec soa \
        $zone @$server
@@ -911,7 +1165,29 @@ Internet-Draft             Failure To Respond               October 2016
 
    +noednsneg disables EDNS version negotiation in DiG.
 
-8.2.9.  Testing With Multiple Defined EDNS Options
+8.2.10.  Testing With Multiple Defined EDNS Options
+
+   Ask for the SOA record of the zone the server is nominally configured
+   to serve.  This query is made with no DNS flag bits set.  EDNS
+   version 0 is used.  A number of defined EDNS options are present
+
+
+
+Andrews                 Expires September 4, 2017              [Page 21]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
+   (NSID [RFC5001], DNS COOKIE [RFC7873], EDNS Client Subnet [RFC7871]
+   and EDNS Expire [RFC7314]).
+
+   We expect the SOA record for the zone to be returned in the answer
+   section with the rcode set to NOERROR and the AA and QR bits to be
+   set in the response, RA may also be set [RFC1034].  We expect a OPT
+   record to be returned.  There should be no EDNS flags present in the
+   response.  The EDNS version field should be zero.  Any of the
+   requested EDNS options supported by the server and permitted server
+   configuration may be returned [RFC6891].
 
    Check that EDNS queries with multiple defined EDNS options work:
 
@@ -946,18 +1222,17 @@ Internet-Draft             Failure To Respond               October 2016
 
    Domain registrants who do not maintain their own DNS infrastructure
    are entitled to a DNS service that conforms to standards and
-
-
-
-Andrews                  Expires April 30, 2017                [Page 17]
-
-Internet-Draft             Failure To Respond               October 2016
-
-
    interoperates well.  Registrants who become aware that their DNS
    operator does not have a well maintained or compliant infrastructure
    should insist that their service provider correct issues, and switch
    providers if they do not.
+
+
+
+Andrews                 Expires September 4, 2017              [Page 22]
+
+Internet-Draft             Failure To Respond                 March 2017
+
 
    In the event that an operator experiences problems due to the
    behaviour of name servers outside their control, the above tests will
@@ -1001,21 +1276,20 @@ Internet-Draft             Failure To Respond               October 2016
    removed zone cut, and the parent operator may find themselves
    responsible for causing new DNS failures to occur.
 
-
-
-
-
-Andrews                  Expires April 30, 2017                [Page 18]
-
-Internet-Draft             Failure To Respond               October 2016
-
-
 10.  Security Considerations
 
    Testing protocol compliance can potentially result in false reports
    of attempts to break services from Intrusion Detection Services and
    firewalls.  None of the tests listed above should break nominally
    EDNS compliant servers.  None of the tests above should break non
+
+
+
+Andrews                 Expires September 4, 2017              [Page 23]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
    EDNS servers.  All the tests above are well formed, though not
    necessarily common, DNS queries.
 
@@ -1032,7 +1306,9 @@ Internet-Draft             Failure To Respond               October 2016
 
    There are no actions for IANA.
 
-12.  Normative References
+12.  References
+
+12.1.  Normative References
 
    [RFC1034]  Mockapetris, P., "Domain names - concepts and facilities",
               STD 13, RFC 1034, DOI 10.17487/RFC1034, November 1987,
@@ -1042,8 +1318,8 @@ Internet-Draft             Failure To Respond               October 2016
               specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
               November 1987, <http://www.rfc-editor.org/info/rfc1035>.
 
-   [RFC3225]  Conrad, D., "Indicating Resolver Support of DNSSEC", RFC
-              3225, DOI 10.17487/RFC3225, December 2001,
+   [RFC3225]  Conrad, D., "Indicating Resolver Support of DNSSEC",
+              RFC 3225, DOI 10.17487/RFC3225, December 2001,
               <http://www.rfc-editor.org/info/rfc3225>.
 
    [RFC4035]  Arends, R., Austein, R., Larson, M., Massey, D., and S.
@@ -1056,20 +1332,19 @@ Internet-Draft             Failure To Respond               October 2016
               DOI 10.17487/RFC6840, February 2013,
               <http://www.rfc-editor.org/info/rfc6840>.
 
-
-
-
-
-
-Andrews                  Expires April 30, 2017                [Page 19]
-
-Internet-Draft             Failure To Respond               October 2016
-
-
    [RFC6891]  Damas, J., Graff, M., and P. Vixie, "Extension Mechanisms
-              for DNS (EDNS(0))", STD 75, RFC 6891, DOI 10.17487/
-              RFC6891, April 2013,
+              for DNS (EDNS(0))", STD 75, RFC 6891,
+              DOI 10.17487/RFC6891, April 2013,
               <http://www.rfc-editor.org/info/rfc6891>.
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 24]
+
+Internet-Draft             Failure To Respond                 March 2017
+
 
    [RFC6895]  Eastlake 3rd, D., "Domain Name System (DNS) IANA
               Considerations", BCP 42, RFC 6895, DOI 10.17487/RFC6895,
@@ -1079,6 +1354,25 @@ Internet-Draft             Failure To Respond               October 2016
               D. Wessels, "DNS Transport over TCP - Implementation
               Requirements", RFC 7766, DOI 10.17487/RFC7766, March 2016,
               <http://www.rfc-editor.org/info/rfc7766>.
+
+12.2.  Informative References
+
+   [RFC5001]  Austein, R., "DNS Name Server Identifier (NSID) Option",
+              RFC 5001, DOI 10.17487/RFC5001, August 2007,
+              <http://www.rfc-editor.org/info/rfc5001>.
+
+   [RFC7314]  Andrews, M., "Extension Mechanisms for DNS (EDNS) EXPIRE
+              Option", RFC 7314, DOI 10.17487/RFC7314, July 2014,
+              <http://www.rfc-editor.org/info/rfc7314>.
+
+   [RFC7871]  Contavalli, C., van der Gaast, W., Lawrence, D., and W.
+              Kumari, "Client Subnet in DNS Queries", RFC 7871,
+              DOI 10.17487/RFC7871, May 2016,
+              <http://www.rfc-editor.org/info/rfc7871>.
+
+   [RFC7873]  Eastlake 3rd, D. and M. Andrews, "Domain Name System (DNS)
+              Cookies", RFC 7873, DOI 10.17487/RFC7873, May 2016,
+              <http://www.rfc-editor.org/info/rfc7873>.
 
 Appendix A.  Document Source
 
@@ -1094,8 +1388,25 @@ Appendix A.  Document Source
 
 Author's Address
 
+
+
+
+
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 25]
+
+Internet-Draft             Failure To Respond                 March 2017
+
+
    M. Andrews
    Internet Systems Consortium
+   950 Charter Street
+   Redwood City, CA  94063
+   US
 
    Email: marka@isc.org
 
@@ -1117,4 +1428,29 @@ Author's Address
 
 
 
-Andrews                  Expires April 30, 2017                [Page 20]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Andrews                 Expires September 4, 2017              [Page 26]
